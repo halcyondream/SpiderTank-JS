@@ -80,19 +80,14 @@ class CallExpressionNode {
   }
 }
 
-const ProjectTypes = {
-  Angular: 1
-};
-
 export class ImportsGraph {
-  constructor(tsProject, workdir, transitive, projectType=null) {
+  constructor(tsProject, workdir, transitive) {
     this.importsGraph = {};
     this.hasVisited = new Set();
     this.toVisit = [];
     this.tsProject = tsProject;
     this.workdir = workdir;
     this.transitive = transitive;
-    this.projectType = ProjectTypes.Angular;
   }
 
   getTreeFromFile (filename) {
@@ -180,6 +175,8 @@ export class ImportsGraph {
   }
 
   getImportConnections(filepath) {
+    if (!this.transitive && filepath.indexOf("node_modules") > -1)
+      return [];
     let fileImportSet = new Set();
     let filePath = path.resolve(filepath)
     let root = this.getTreeFromFile(filePath);

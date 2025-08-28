@@ -4,7 +4,10 @@ This is a prototype. Use at your own risk.
 
 SpiderTank-JS parses imports starting from an entrypoint file and traces
 paths leading to a sink package. Direct import parsing is mostly stable.
-This should handle JavaScript and TypeScript files.
+This should handle JavaScript and TypeScript files. The default behavior
+is fundamentally similar to running `madge` with shallow imports, but the
+engine is intended to seek all files in all imports, not just those
+esposed through direct imports.
 
 While there is some limited capability to parse transitive dependencies,
 this is largely a useless exercise on its own. If you really need to 
