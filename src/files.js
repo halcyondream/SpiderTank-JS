@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import log from './log.js';
 
-export const require = Module.createRequire(import.meta.url);
+const require = Module.createRequire(import.meta.url);
 
-export const isFile = (filepath) => {
+const isFile = (filepath) => {
   try {
     return fs.statSync(filepath).isFile();
   } catch (e) {
@@ -13,28 +13,28 @@ export const isFile = (filepath) => {
   }
 }
 
-export const readPackageDotJson = (packageDotJsonPath) => 
+const readPackageDotJson = (packageDotJsonPath) => 
   JSON.parse(fs.readFileSync(packageDotJsonPath, 'utf-8'));
 
-export const getPathRelativeToFile = (baseFilename, relativeFilename) => {
+const getPathRelativeToFile = (baseFilename, relativeFilename) => {
   const dirname = path.dirname(path.resolve(baseFilename));
   const resolved = path.resolve(dirname, relativeFilename);
   return resolved;
 };
 
-export const resolvePath = (filepath) => {
+const resolvePath = (filepath) => {
   if (filepath[0] === '~') {
     return path.join(process.env.HOME, filepath.slice(1));
   }
   return path.resolve(filepath);
 };
 
-export const resolveNodeModule = (importName, workdir) => {
+const resolveNodeModule = (importName, workdir) => {
   const options = workdir ? {paths: [workdir]} : null;
   return require.resolve(importName, options);
 };
 
-export const resolveModuleFromName = (importName, workdir) => {
+const resolveModuleFromName = (importName, workdir) => {
   try {
     return resolveNodeModule(importName, workdir);
   } catch (e) {
@@ -48,7 +48,7 @@ export const resolveModuleFromName = (importName, workdir) => {
   return null;
 };
 
-export const getModulePath = (importName, modulePath, workdir, transitive=false) => {
+const getModulePath = (importName, modulePath, workdir, transitive=false) => {
   if (!transitive && modulePath.indexOf('node_modules') >= 0) {
     return null;
   }
@@ -92,10 +92,21 @@ export const getModulePath = (importName, modulePath, workdir, transitive=false)
   return resolvedPath;
 };
 
-export const sanitizeStringLiteral = (str) => {
+const sanitizeStringLiteral = (str) => {
   return str
     .replace(/^"|"$/g, '')
     .replace(/^'|'$/g, '')
     .replace('\t', '')
     .replace(' ', '');
+};
+
+export default {
+  sanitizeStringLiteral: sanitizeStringLiteral,
+  getModulePath: getModulePath,
+  resolveModuleFromName: resolveModuleFromName,
+  resolveNodeModule: resolveNodeModule,
+  resolvePath: resolvePath,
+  getPathRelativeToFile: getPathRelativeToFile,
+  readPackageDotJson: readPackageDotJson,
+  isFile: isFile
 };

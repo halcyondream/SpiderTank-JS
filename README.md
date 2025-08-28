@@ -34,7 +34,7 @@ optional arguments:
                         Only spider first-party code
 ```
 
-Example, using the project itself. Suppose we want to target the,
+Example, using the project itself. Suppose we want to target the
 `ts-morph` package, which is directly imported in `package.json`:
 
 ```

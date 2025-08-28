@@ -1,11 +1,5 @@
 import { SyntaxKind } from 'ts-morph';
-import {
-  resolveNodeModule,
-  getPathRelativeToFile,
-  sanitizeStringLiteral,
-  readPackageDotJson,
-  isFile
-} from './files.js';
+import files from './files.js'
 import log from './log.js';
 import path from "path";
 
@@ -18,7 +12,7 @@ class ImportDeclNode {
   }
 
   getResolvedFilePath(workdir) {
-    return resolveNodeModule(this.getPackageName(), workdir);
+    return files.resolveNodeModule(this.getPackageName(), workdir);
   }
     
   getPackageName() {
@@ -82,7 +76,7 @@ class CallExpressionNode {
     if (!descendants?.length) {
       return;
     }
-    return sanitizeStringLiteral(descendants[0].getText());
+    return files.sanitizeStringLiteral(descendants[0].getText());
   }
 }
 
@@ -116,14 +110,14 @@ export class ImportsGraph {
       return;
     }
     try {
-      return resolveNodeModule(callExprNode.getFirstArgument(), this.workdir);
+      return files.resolveNodeModule(callExprNode.getFirstArgument(), this.workdir);
     } catch (e) {
       console.error(e);
     }
     try {
-      const relativeFilePath = getPathRelativeToFile(filepath, callExprNode.getFirstArgument());
-      let resolvedModule = resolveNodeModule(relativeFilePath);
-      if (isFile(resolvedModule)) return resolvedModule;      
+      const relativeFilePath = files.getPathRelativeToFile(filepath, callExprNode.getFirstArgument());
+      let resolvedModule = files.resolveNodeModule(relativeFilePath);
+      if (files.isFile(resolvedModule)) return resolvedModule;      
     } catch (e) {
       log.error(e);
     }
@@ -151,10 +145,10 @@ export class ImportsGraph {
       // Use case: things in dist/, compiled to ESM or FESM.
       const compilerPaths = importDeclNode.getPathsFromCompilerOptions(this.tsProject);
       const compilerPath = path.resolve(compilerPaths[0])
-      if (isFile(compilerPath)) return compilerPath
+      if (files.isFile(compilerPath)) return compilerPath
       const packageDotJsonPath = path.join(compilerPath, 'package.json');
-      if (!isFile(packageDotJsonPath)) return;
-      const packageDotJson = readPackageDotJson(packageDotJsonPath);
+      if (!files.isFile(packageDotJsonPath)) return;
+      const packageDotJson = files.readPackageDotJson(packageDotJsonPath);
       const exports = packageDotJson?.exports;
       const module = packageDotJson?.module;
       if (!exports && !module) return;
@@ -162,7 +156,7 @@ export class ImportsGraph {
       if (this.projectType == ProjectTypes.Angular) {
         defaultExport = path.join(compilerPath, exports['.'].default)
       }
-      if (!isFile(defaultExport)) throw new Error("Couldn't resolve ESM/FESM type.");
+      if (!files.isFile(defaultExport)) throw new Error("Couldn't resolve ESM/FESM type.");
       return defaultExport;
     } catch (e) {
       log.error(e);
@@ -170,7 +164,7 @@ export class ImportsGraph {
     try {
       // Try to determine the file path. 
       // TODO: Implement file suffix checks as needed.
-      return getPathRelativeToFile(filepath, importDeclNode.getPackageName());
+      return files.getPathRelativeToFile(filepath, importDeclNode.getPackageName());
     } catch (e) {
       log.error(e);
     }

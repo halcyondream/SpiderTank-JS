@@ -1,6 +1,6 @@
 import { Project } from 'ts-morph';
 import path from 'path';
-import { resolvePath } from './src/files.js';
+import files from './src/files.js';
 import { ImportsGraph } from './src/graph.js';
 import spider from './src/spider.js';
 import fs from 'fs';
@@ -65,7 +65,7 @@ const getProject = (tsconfig) => {
 const project = getProject(tsConfigPath);
 project.addSourceFilesAtPaths('node_modules');
 
-const workdir = resolvePath(basePath);
+const workdir = files.resolvePath(basePath);
 process.chdir(workdir);
 
 try {
