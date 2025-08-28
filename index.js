@@ -5,8 +5,8 @@ import spider from './src/spider.js';
 import fs from 'fs';
 import log from './src/log.js';
 import { ArgumentParser } from 'argparse';
-import dot from "./src/dot.js";
-import projects from "./src/projects.js";
+import dot from './src/dot.js';
+import projects from './src/projects.js';
 
 const runtimeStart = Date.now();
 console.log(`Starting spidertank at ${new Date(runtimeStart)}`);
@@ -20,7 +20,7 @@ parser.add_argument('-t', '--target', { default: null, help: 'Target package for
 parser.add_argument('-c', '--tsconfig', { default: null, help: 'Optional TypeScript config (ex, tsconfig.json)' });
 parser.add_argument('-l', '--loglevel', {default: null, help: 'Optional: ERROR, WARN, INFO, or DEBUG'});
 parser.add_argument('-nt', '--notransitive', { default: false, help: 'Only spider first-party code' });
-parser.add_argument('-p', '--projecttype', {default: null, help: "[js|ts|ang]"})
+parser.add_argument('-p', '--projecttype', {default: null, help: '[js|ts|ang]'});
 const args = parser.parse_args();
 
 let argFilename = args.entrypoint;
@@ -29,16 +29,16 @@ let argTargetPackage = args.target;
 let argTsConfig = args.tsconfig;
 let projectType;
 switch (args.projectType) {
-  case 'ts':
-    projectType = projects.ProjectTypes.TYPESCRIPT;
-    break;
-  case 'ang':
-    projectType = projects.ProjectTypes.ANGULAR;
-    break;
-  default:
-    projectType = projects.ProjectTypes.JAVASCRIPT;
-    break;
-};
+case 'ts':
+  projectType = projects.ProjectTypes.TYPESCRIPT;
+  break;
+case 'ang':
+  projectType = projects.ProjectTypes.ANGULAR;
+  break;
+default:
+  projectType = projects.ProjectTypes.JAVASCRIPT;
+  break;
+}
 const transitive = !args.notransitive;
 
 let entrypoint;
@@ -54,7 +54,7 @@ if (argBasePath) {
   entrypoint = path.basename(argFilename);
 }
 
-let tsConfigPath = ""
+let tsConfigPath = '';
 
 if (argTsConfig) 
   tsConfigPath = path.join(basePath, argTsConfig);
@@ -86,7 +86,7 @@ console.log('Spidering results...');
 let traceResults = spider.tracePaths(importsGraph, entrypoint, argTargetPackage);
 console.log(JSON.stringify(traceResults, null, 2));
 
-console.log(dot.arrayToDotDigraph(traceResults, basePath))
+console.log(dot.arrayToDotDigraph(traceResults, basePath));
 
 console.log('DONE');
 

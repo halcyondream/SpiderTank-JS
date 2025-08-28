@@ -1,8 +1,8 @@
 import { Project, SyntaxKind } from 'ts-morph';
-import files from './files.js'
+import files from './files.js';
 import log from './log.js';
-import path from "path";
-import { ProjectTypes } from "./projects.js";
+import path from 'path';
+import { ProjectTypes } from './projects.js';
 
 class ImportDeclNode {
   constructor(node) {
@@ -30,29 +30,29 @@ class ImportDeclNode {
   }
 
   getPathsFromCompilerOptions(tsProject) {
-    return tsProject.getCompilerOptions().paths[this.getPackageName()]
+    return tsProject.getCompilerOptions().paths[this.getPackageName()];
   }
 }
 
 class ExportedDeclNode {
   constructor(node) {
     if (!node.getKind() === SyntaxKind.ExportDeclaration) {
-      throw new Error('Not an ExportDeclaration type.')
+      throw new Error('Not an ExportDeclaration type.');
     }
-    this.node = node 
+    this.node = node; 
   }
 
   getDeepFilePaths() {
     return Array.from(this.node.getExportedDeclarations().values())
-                  .map(a => 
-                    a.map(a => 
-                      a.compilerNode.symbol.declarations
-                        .map(a => a.parent.resolvedPath)
-                      )
-                    )
-                    .flat()
-                  .flat()
-                  .filter(p => p !== undefined)
+      .map(a => 
+        a.map(a => 
+          a.compilerNode.symbol.declarations
+            .map(a => a.parent.resolvedPath)
+        )
+      )
+      .flat()
+      .flat()
+      .filter(p => p !== undefined);
   }
 }
 
@@ -135,7 +135,7 @@ export class ImportsGraph {
       // This works for Angular components, etc.
       const resolve = path.resolve(importDeclNode.getDeepFilePath());
       if (resolve.endsWith('.d.ts')) {
-        throw new Error(`Passing *.d.ts file: ${resolve}`)
+        throw new Error(`Passing *.d.ts file: ${resolve}`);
       }
       return resolve;
     } catch (e) {
@@ -144,8 +144,8 @@ export class ImportsGraph {
     try {
       // Use case: things in dist/, compiled to ESM or FESM.
       const compilerPaths = importDeclNode.getPathsFromCompilerOptions(this.tsProject);
-      const compilerPath = path.resolve(compilerPaths[0])
-      if (files.isFile(compilerPath)) return compilerPath
+      const compilerPath = path.resolve(compilerPaths[0]);
+      if (files.isFile(compilerPath)) return compilerPath;
       const packageDotJsonPath = path.join(compilerPath, 'package.json');
       if (!files.isFile(packageDotJsonPath)) return;
       const packageDotJson = files.readPackageDotJson(packageDotJsonPath);
@@ -154,7 +154,7 @@ export class ImportsGraph {
       if (!exports && !module) return;
       let defaultExport;
       if (this.projectType == ProjectTypes.Angular) {
-        defaultExport = path.join(compilerPath, exports['.'].default)
+        defaultExport = path.join(compilerPath, exports['.'].default);
       }
       if (!files.isFile(defaultExport)) throw new Error("Couldn't resolve ESM/FESM type.");
       return defaultExport;
@@ -175,15 +175,15 @@ export class ImportsGraph {
     try {
       return exportDeclNode.getDeepFilePaths();
     } catch (e) {
-      log.error(e)
+      log.error(e);
     }
   }
 
   getImportConnections(filepath) {
-    if (!this.transitive && filepath.indexOf("node_modules") > -1)
+    if (!this.transitive && filepath.indexOf('node_modules') > -1)
       return [];
     let fileImportSet = new Set();
-    let filePath = path.resolve(filepath)
+    let filePath = path.resolve(filepath);
     let root = this.getTreeFromFile(filePath);
     if (root === null) {
       return [];
@@ -194,18 +194,18 @@ export class ImportsGraph {
       callExpressions
         .map(node => this.visitCallExpression(node))
         .filter(node => node !== undefined)
-        .forEach(file => fileImportSet.add(path.resolve(file)))
+        .forEach(file => fileImportSet.add(path.resolve(file)));
     }
     if (importDecls?.length){
       importDecls
         .map(node => this.visitImportDeclaration(node, filePath))
         .filter(node => node !== undefined)
-        .forEach(file => fileImportSet.add(path.resolve(file)))
+        .forEach(file => fileImportSet.add(path.resolve(file)));
     }
     if (root.getExportedDeclarations()?.size) {
       const exportDecls = this.visitExportDeclarations(root);
       if (exportDecls?.length) {
-        exportDecls.forEach(e => fileImportSet.add(path.resolve(e)))
+        exportDecls.forEach(e => fileImportSet.add(path.resolve(e)));
       }
     }
     return Array.from(fileImportSet);

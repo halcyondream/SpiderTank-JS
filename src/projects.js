@@ -2,10 +2,10 @@ import { Project } from 'ts-morph';
 
 
 export class ProjectTypes {
-    JAVASCRIPT = 0;
-    TYPESCRIPT = 1
-    ANGULAR = 2;
-};
+  JAVASCRIPT = 0;
+  TYPESCRIPT = 1;
+  ANGULAR = 2;
+}
 
 const getProject = (tsconfig) => {
   let tsconfigPath;
@@ -24,6 +24,6 @@ const getProject = (tsconfig) => {
 };
 
 export default {
-    ProjectTypes: ProjectTypes,
-    getProject: getProject
+  ProjectTypes: ProjectTypes,
+  getProject: getProject
 };

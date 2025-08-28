@@ -17,9 +17,9 @@ const isFile = (filepath) => {
   try {
     return fs.statSync(filepath).isFile();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
+};
 
 const readPackageDotJson = (packageDotJsonPath) => 
   JSON.parse(fs.readFileSync(packageDotJsonPath, 'utf-8'));

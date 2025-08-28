@@ -1,4 +1,4 @@
-import path from "path"
+import path from 'path';
 
 const tracePaths = (graph, root, target) => {
   // Non-recursive DFS.
@@ -13,7 +13,7 @@ const tracePaths = (graph, root, target) => {
     let children = graph[name] || [];
     while (children.length) {
       let child = children.pop();
-      if (!ppath || !ppath?.includes) continue
+      if (!ppath || !ppath?.includes) continue;
       if (!ppath.includes(child)) {
         stack.push({
           name: child,
@@ -38,4 +38,4 @@ const findNodeModuleReferences = (importsGraph, target) => {
 export default {
   tracePaths: tracePaths,
   findNodeModuleReferences: findNodeModuleReferences
-}
+};
