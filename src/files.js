@@ -2,6 +2,14 @@ import Module from 'node:module';
 import fs from 'fs';
 import path from 'path';
 import log from './log.js';
+import module from 'module';
+
+class BuiltInModuleException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'BuiltInModuleException';
+  }
+}
 
 const require = Module.createRequire(import.meta.url);
 
@@ -30,8 +38,13 @@ const resolvePath = (filepath) => {
 };
 
 const resolveNodeModule = (importName, workdir) => {
+  // Resolve node modules. Do not resolve built-ins. 
   const options = workdir ? {paths: [workdir]} : null;
-  return require.resolve(importName, options);
+  const resolvedPath = require.resolve(importName, options);
+  if (!isFile(resolvedPath))
+    if (module.builtinModules.includes(resolvedPath))
+      throw new BuiltInModuleException(`${resolvedPath} is a node built-in module.`);
+  return resolvedPath;
 };
 
 const resolveModuleFromName = (importName, workdir) => {
@@ -108,5 +121,6 @@ export default {
   resolvePath: resolvePath,
   getPathRelativeToFile: getPathRelativeToFile,
   readPackageDotJson: readPackageDotJson,
-  isFile: isFile
+  isFile: isFile,
+  BuiltInModuleException: BuiltInModuleException
 };

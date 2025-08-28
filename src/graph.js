@@ -126,6 +126,9 @@ export class ImportsGraph {
       // Best case: resolves to the target on the filesystem.
       return importDeclNode.getResolvedFilePath(this.workdir);
     } catch (e) {
+      if (e instanceof files.BuiltInModuleException) {
+        return;
+      }
       log.error(e);
     }
     try {

@@ -65,11 +65,6 @@ Found 12 unique paths.
 ]
 ```
 
-The resolver currently has no awareness of the difference between inbuilt
-modules versus other types, so you'll notice `fs` and `path` in the
-output. This should be fixed, but it doesn't necessarily impact the main
-business logic.
-
 *Nested array of all paths to target*:
 
 ```
