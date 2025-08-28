@@ -1,4 +1,3 @@
-import { Project } from 'ts-morph';
 import path from 'path';
 import files from './src/files.js';
 import { ImportsGraph } from './src/graph.js';
@@ -6,26 +5,40 @@ import spider from './src/spider.js';
 import fs from 'fs';
 import log from './src/log.js';
 import { ArgumentParser } from 'argparse';
-import dot from "./src/dot.js"
+import dot from "./src/dot.js";
+import projects from "./src/projects.js";
 
 const runtimeStart = Date.now();
 console.log(`Starting spidertank at ${new Date(runtimeStart)}`);
 
 const parser = new ArgumentParser({
-  description: 'Argparse example'
+  description: 'SpiderTank'
 });
 parser.add_argument('-e', '--entrypoint', { help: 'Filename which represents the application entrypoint' });
 parser.add_argument('-b', '--basedir', { default: null, help: 'Base directory path' });
-parser.add_argument('-p', '--target', { default: null, help: 'Target package for spidering paths from the entrypoint' });
+parser.add_argument('-t', '--target', { default: null, help: 'Target package for spidering paths from the entrypoint' });
 parser.add_argument('-c', '--tsconfig', { default: null, help: 'Optional TypeScript config (ex, tsconfig.json)' });
 parser.add_argument('-l', '--loglevel', {default: null, help: 'Optional: ERROR, WARN, INFO, or DEBUG'});
 parser.add_argument('-nt', '--notransitive', { default: false, help: 'Only spider first-party code' });
+parser.add_argument('-p', '--projecttype', {default: null, help: "[js|ts|ang]"})
 const args = parser.parse_args();
 
 let argFilename = args.entrypoint;
 let argBasePath = args.basedir;
 let argTargetPackage = args.target;
 let argTsConfig = args.tsconfig;
+let projectType;
+switch (args.projectType) {
+  case 'ts':
+    projectType = projects.ProjectTypes.TYPESCRIPT;
+    break;
+  case 'ang':
+    projectType = projects.ProjectTypes.ANGULAR;
+    break;
+  default:
+    projectType = projects.ProjectTypes.JAVASCRIPT;
+    break;
+};
 const transitive = !args.notransitive;
 
 let entrypoint;
@@ -46,23 +59,7 @@ let tsConfigPath = ""
 if (argTsConfig) 
   tsConfigPath = path.join(basePath, argTsConfig);
 
-const getProject = (tsconfig) => {
-  let tsconfigPath;
-  if (tsconfig) {
-    log.warn('Loading tsconfig file into project. This can take a long time.');
-    if (tsconfig[0] === '~') {
-      tsconfigPath = path.join(process.env.HOME, tsconfig.slice(1));
-    } else {
-      tsconfigPath = tsconfig;
-    }
-    return new Project(
-      {tsConfigFilePath: tsconfigPath}
-    );
-  }
-  return new Project();
-};
-
-const project = getProject(tsConfigPath);
+const project = projects.getProject(tsConfigPath);
 project.addSourceFilesAtPaths('node_modules');
 
 const workdir = files.resolvePath(basePath);
@@ -76,7 +73,7 @@ try {
   process.exit(1);
 }
 
-const graph = new ImportsGraph(project, workdir, transitive);
+const graph = new ImportsGraph(project, workdir, transitive, projectType);
 const importsGraph = graph.traverse(entrypoint);
 
 log.info(JSON.stringify(importsGraph, null, 2));

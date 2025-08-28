@@ -17,9 +17,9 @@ package, not using their counterparts from `dist/` or `node_modules/`.
 Usage:
 
 ```
-usage: index.js [-h] [-e ENTRYPOINT] [-b BASEDIR] [-p TARGET] [-c TSCONFIG] [-l LOGLEVEL] [-nt NOTRANSITIVE]
+usage: index.js [-h] [-e ENTRYPOINT] [-b BASEDIR] [-t TARGET] [-c TSCONFIG] [-l LOGLEVEL] [-nt NOTRANSITIVE] [-p PROJECTTYPE]
 
-Argparse example
+SpiderTank
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -27,7 +27,7 @@ optional arguments:
                         Filename which represents the application entrypoint
   -b BASEDIR, --basedir BASEDIR
                         Base directory path
-  -p TARGET, --target TARGET
+  -t TARGET, --target TARGET
                         Target package for spidering paths from the entrypoint
   -c TSCONFIG, --tsconfig TSCONFIG
                         Optional TypeScript config (ex, tsconfig.json)
@@ -35,13 +35,15 @@ optional arguments:
                         Optional: ERROR, WARN, INFO, or DEBUG
   -nt NOTRANSITIVE, --notransitive NOTRANSITIVE
                         Only spider first-party code
+  -p PROJECTTYPE, --projecttype PROJECTTYPE
+                        [js|ts|ang]
 ```
 
 Example, using the project itself. Suppose we want to target the
 `ts-morph` package, which is directly imported in `package.json`:
 
 ```
-node index.js -b $(pwd) -p ts-morph -e index.js -nt true
+node index.js -b $(pwd) -t ts-morph -e index.js -nt true -p js
 ```
 
 Output is given in a few parts. 
@@ -49,17 +51,17 @@ Output is given in a few parts.
 *All files resolved*:
 
 ```
-Found 23 unique paths.
+Found 12 unique paths.
 [
-  'basepath/SpiderTank-JS/node_modules/ts-morph/dist/ts-morph.js',
-  'basepath/SpiderTank-JS/path',
-  'basepath/SpiderTank-JS/src/files.js',
-  'basepath/SpiderTank-JS/src/graph.js',
-  'basepath/SpiderTank-JS/src/spider.js',
-  'basepath/SpiderTank-JS/fs',
-  'basepath/SpiderTank-JS/src/log.js',
-  'basepath/SpiderTank-JS/node_modules/argparse/argparse.js',
-  'basepath/SpiderTank-JS/src/dot.js'
+  '/Users/rprofessional/Documents/SpiderTank-JS/path',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/files.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/graph.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/spider.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/fs',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/log.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/node_modules/argparse/argparse.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/dot.js',
+  '/Users/rprofessional/Documents/SpiderTank-JS/src/projects.js'
 ]
 ```
 
@@ -74,12 +76,14 @@ business logic.
 [
   [
     "index.js",
-    "basepath/SpiderTank-JS/node_modules/ts-morph/dist/ts-morph.js"
+    "/Users/rprofessional/Documents/SpiderTank-JS/src/graph.js",
+    "/Users/rprofessional/Documents/SpiderTank-JS/node_modules/ts-morph/dist/ts-morph.js"
   ],
   [
     "index.js",
-    "basepath/SpiderTank-JS/src/graph.js",
-    "basepath/SpiderTank-JS/node_modules/ts-morph/dist/ts-morph.js"
+    "/Users/rprofessional/Documents/SpiderTank-JS/src/graph.js",
+    "/Users/rprofessional/Documents/SpiderTank-JS/src/projects.js",
+    "/Users/rprofessional/Documents/SpiderTank-JS/node_modules/ts-morph/dist/ts-morph.js"
   ]
 ]
 ```
@@ -88,10 +92,12 @@ business logic.
 
 ```
 strict digraph {
-  "index.js" -> "/node_modules/ts-morph/dist/ts-morph.js"
   "index.js" -> "/src/graph.js"
   "/src/graph.js" -> "/node_modules/ts-morph/dist/ts-morph.js"
+  "index.js" -> "/src/graph.js"
+  "/src/graph.js" -> "/src/projects.js"
+  "/src/projects.js" -> "/node_modules/ts-morph/dist/ts-morph.js"
 }
 ```
 
-([And the example used in GraphViz online](https://dreampuf.github.io/GraphvizOnline/?engine=dot#strict%20digraph%20%7B%0A%20%20%22index.js%22%20-%3E%20%22%2Fnode_modules%2Fts-morph%2Fdist%2Fts-morph.js%22%0A%20%20%22index.js%22%20-%3E%20%22%2Fsrc%2Fgraph.js%22%0A%20%20%22%2Fsrc%2Fgraph.js%22%20-%3E%20%22%2Fnode_modules%2Fts-morph%2Fdist%2Fts-morph.js%22%0A%7D))
+([And the example used in GraphViz online](https://dreampuf.github.io/GraphvizOnline/?engine=dot#strict%20digraph%20%7B%0A%20%20%22index.js%22%20-%3E%20%22%2Fsrc%2Fgraph.js%22%0A%20%20%22%2Fsrc%2Fgraph.js%22%20-%3E%20%22%2Fnode_modules%2Fts-morph%2Fdist%2Fts-morph.js%22%0A%20%20%22index.js%22%20-%3E%20%22%2Fsrc%2Fgraph.js%22%0A%20%20%22%2Fsrc%2Fgraph.js%22%20-%3E%20%22%2Fsrc%2Fprojects.js%22%0A%20%20%22%2Fsrc%2Fprojects.js%22%20-%3E%20%22%2Fnode_modules%2Fts-morph%2Fdist%2Fts-morph.js%22%0A%7D))

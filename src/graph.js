@@ -1,7 +1,8 @@
-import { SyntaxKind } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import files from './files.js'
 import log from './log.js';
 import path from "path";
+import { ProjectTypes } from "./projects.js";
 
 class ImportDeclNode {
   constructor(node) {
@@ -81,13 +82,14 @@ class CallExpressionNode {
 }
 
 export class ImportsGraph {
-  constructor(tsProject, workdir, transitive) {
+  constructor(tsProject, workdir, transitive, projectType=null) {
     this.importsGraph = {};
     this.hasVisited = new Set();
     this.toVisit = [];
     this.tsProject = tsProject;
     this.workdir = workdir;
     this.transitive = transitive;
+    this.projectType = projectType;
   }
 
   getTreeFromFile (filename) {
