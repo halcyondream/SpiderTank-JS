@@ -4,4 +4,4 @@ scratch/
 .vscode/
 dist/
 samples/
-**/package-lock.json
+package-lock.json
